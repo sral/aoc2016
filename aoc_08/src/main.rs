@@ -104,13 +104,7 @@ fn draw_screen(screen: &[Vec<u32>]) {
 fn main() {
     // 6 x 50
     let mut screen = vec![
-        vec![0; 50],
-        vec![0; 50],
-        vec![0; 50],
-        vec![0; 50],
-        vec![0; 50],
-        vec![0; 50]
-        ];
+    vec![0; 50]; 6];
 
     let path = Path::new("input");
     let file = BufReader::new(File::open(&path).expect("Couldn't open file."));
@@ -139,7 +133,7 @@ fn main() {
                     let h: usize = tokens[2].parse().unwrap();
                     draw_rect(&mut screen, w, h);
                 }
-            },
+            }
             Err(_) => panic!("Bork. Bork."),
         }
     }
