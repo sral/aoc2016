@@ -95,21 +95,9 @@ impl<'a> CPU<'a> {
                 }
             }
             "jnz" => {
-                let op = tokens[1];
-                // TODO: This assumption is borked, this can register or
-                // offset. Bah!
-                let mut offset: i32 = tokens[2].parse().unwrap();
-                // PC is incremented after fetch so offset needs to be
-                // decremented or we jump too far.
-                offset -= 1;
-                match op.parse::<i32>() {
-                    Ok(imm) => {
-                        self.inst_jnz_imm(imm, offset);
-                    }
-                    Err(_) => {
-                        self.inst_jnz(op.chars().next().unwrap(), offset);
-                    }
-                }
+                let op_one = tokens[1];
+                let op_two = tokens[2];
+                self.inst_jnz(op_one, op_two);
             }
             "inc" => {
                 let dst = tokens[1].chars().next().unwrap();
@@ -150,18 +138,32 @@ impl<'a> CPU<'a> {
         *self.chr_to_reg(dst) = imm;
     }
 
-    fn inst_jnz(&mut self, reg: char, offset: i32) {
-        if *self.chr_to_reg(reg) == 0 {
+    fn inst_jnz(&mut self, op_one: &str, op_two: &str) {
+        // Forms:
+        // - jnz x y
+        // - jnz x #
+        // - jnz # x
+        // - jnz # #
+        let cond = match op_one.parse::<i32>() {
+            Ok(imm) => imm,
+            Err(_) => {
+                let reg = op_one.chars().next().unwrap();
+                *self.chr_to_reg(reg)
+            }
+        };
+        if cond == 0 {
             return;
         }
-        self.pc += offset;
-    }
 
-    fn inst_jnz_imm(&mut self, imm: i32, offset: i32) {
-        if imm == 0 {
-            return;
-        }
-        self.pc += offset;
+        let offset = match op_two.parse::<i32>() {
+            Ok(imm) => imm,
+            Err(_) => {
+                let reg = op_two.chars().next().unwrap();
+                *self.chr_to_reg(reg)
+            }
+        };
+
+        self.pc += offset - 1;
     }
 
     fn new(memory: &[String]) -> CPU {
