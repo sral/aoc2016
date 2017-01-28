@@ -68,6 +68,7 @@ struct CPU<'a> {
 
 impl<'a> CPU<'a> {
     fn tick(&mut self) {
+        // Halt if PC points to illegal address.
         if self.pc < 0 || self.pc >= self.memory.len() as i32 {
             self.halt = true;
             return;
@@ -93,18 +94,11 @@ impl<'a> CPU<'a> {
                     }
                 }
             }
-            "inc" => {
-                let dst = tokens[1].chars().next().unwrap();
-                self.inst_inc(dst);
-            }
-            "dec" => {
-                let dst = tokens[1].chars().next().unwrap();
-                self.inst_dec(dst);
-            }
             "jnz" => {
                 let op = tokens[1];
                 let mut offset: i32 = tokens[2].parse().unwrap();
-                // PC is incremented after fetch
+                // PC is incremented after fetch so offset needs to be
+                // decremented or we jump too far.
                 offset -= 1;
                 match op.parse::<i32>() {
                     Ok(imm) => {
@@ -114,6 +108,14 @@ impl<'a> CPU<'a> {
                         self.inst_jnz(op.chars().next().unwrap(), offset);
                     }
                 }
+            }
+            "inc" => {
+                let dst = tokens[1].chars().next().unwrap();
+                self.inst_inc(dst);
+            }
+            "dec" => {
+                let dst = tokens[1].chars().next().unwrap();
+                self.inst_dec(dst);
             }
             _ => panic!("Illegal instruction: {}", opcode),
         }
