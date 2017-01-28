@@ -96,6 +96,8 @@ impl<'a> CPU<'a> {
             }
             "jnz" => {
                 let op = tokens[1];
+                // TODO: This assumption is borked, this can register or
+                // offset. Bah!
                 let mut offset: i32 = tokens[2].parse().unwrap();
                 // PC is incremented after fetch so offset needs to be
                 // decremented or we jump too far.
