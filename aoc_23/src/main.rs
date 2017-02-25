@@ -198,7 +198,6 @@ impl<'a> CPU<'a> {
         let instruction = self.memory[address as usize].clone();
         let tokens: Vec<&str> = instruction.split_whitespace().collect();
         let opcode = tokens[0];
-
         let new_instruction = match opcode {
             "inc" => "dec ".to_string() + tokens[1],
             "dec" | "tgl" => "inc ".to_string() + tokens[1],
@@ -240,7 +239,6 @@ fn main() {
 
     let mut cpu = CPU::new(&mut memory);
     while !cpu.halt {
-        // println!("{:?}", cpu);
         cpu.tick();
     }
     println!("CPU register a := {}", cpu.a);
